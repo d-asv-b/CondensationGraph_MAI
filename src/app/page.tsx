@@ -7,7 +7,7 @@ export default function HomePage() {
             <h1 className="text-4xl font-bold mb-4">Graph Condensation</h1>
             <p className="text-sm text-gray-500">Выполнил студент 8 института МАИ - <span className="font-semibold">Синькин Андрей</span>, группа - <span className="font-semibold">М8О-115БВ-24</span></p>
             <p className="text-sm mb-8 text-gray-500"><a className="text-blue-500 hover:text-blue-600 active:text-blue-800" href="https://github.com/d-asv-b/CondensationGraph_MAI">Репозиторий проекта</a></p>
-            <p className="text-lg">"Граф конденсации для графа заданного матрицей смежности"</p>
+            <p className="text-lg">Граф конденсации для графа заданного матрицей смежности</p>
 
             <hr
                 className="w-full my-8 border-0 h-0.5"
