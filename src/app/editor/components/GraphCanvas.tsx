@@ -21,17 +21,16 @@ export const MouseState = {
 };
 
 interface GraphCanvasProps {
-    width?: number;
-    height?: number;
+    adjacencyMatrix: number[][];
     updateAdjacencyMatrix?: (matrix: number[][]) => void;
     colors: string[];
     stronglyConnectedComponents: number[];
+    isCondensation?: boolean;
     mouseState?: number;
 }
 
-export default function GraphCanvas({ updateAdjacencyMatrix, colors, stronglyConnectedComponents = [], mouseState = MouseState.Idle }: GraphCanvasProps) {
+export default function GraphCanvas({ adjacencyMatrix,  updateAdjacencyMatrix, isCondensation = false, colors, stronglyConnectedComponents = [], mouseState = MouseState.Idle }: GraphCanvasProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const { adjacencyMatrix } = useAdjacencyMatrix();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const vertexesRef = useRef<Vertex[]>(getVertexesFromAdjacencyMatrix(adjacencyMatrix));
     const edgesRef = useRef<Edge[]>(getEdgesFromAdjacencyMatrix(vertexesRef.current, adjacencyMatrix));
@@ -47,10 +46,12 @@ export default function GraphCanvas({ updateAdjacencyMatrix, colors, stronglyCon
     }, [mouseState]);
 
     useEffect(() => {
-        if (!initializedRef.current && adjacencyMatrix.length > 0) {
+        if (isCondensation || !initializedRef.current) {
+            if (adjacencyMatrix.length > 0) {
             vertexesRef.current = getVertexesFromAdjacencyMatrix(adjacencyMatrix);
             edgesRef.current = getEdgesFromAdjacencyMatrix(vertexesRef.current, adjacencyMatrix);
             initializedRef.current = true;
+            }
         }
     }, [adjacencyMatrix]);
 
@@ -210,7 +211,12 @@ export default function GraphCanvas({ updateAdjacencyMatrix, colors, stronglyCon
         }
 
         for (let i = 0; i < vertexesRef.current.length; i++) {
-            vertexesRef.current[i].draw(canvasContext, `V${i + 1}`, colors[stronglyConnectedComponents[i]] || "white");
+            const vertex = vertexesRef.current[i];
+            if (isCondensation) {
+                vertex.draw(canvasContext, `C${i + 1}`, colors[i] || "white");
+            } else {
+                vertex.draw(canvasContext, `V${i + 1}`, colors[stronglyConnectedComponents[i] - 1] || "white");
+            }
         }
     }
 

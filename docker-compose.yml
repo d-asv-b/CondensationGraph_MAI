@@ -1,0 +1,11 @@
+services:
+  condensation_graph:
+    build: ./
+    ports:
+      - ":3535"
+    networks:
+      - main_network
+
+networks:
+    main_network:
+        external: true

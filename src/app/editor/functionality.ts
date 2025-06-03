@@ -151,3 +151,22 @@ export function generateRandomColors(count: number): string[] {
     }
     return colors;
 }
+
+export function getCondensationAdjMatrix(srcAdjMatrix: number[][], scc: number[]): number[][] {
+    const sccCount = Math.max(...scc);
+    const condensationMatrix: number[][] = Array.from({ length: sccCount }, () => Array(sccCount).fill(0));
+
+    for (let i = 0; i < srcAdjMatrix.length; ++i) {
+        let component = scc[i];
+        for (let j = 0; j < srcAdjMatrix[i].length; ++j) {
+            if (srcAdjMatrix[i][j] === 1) {
+                let neighborComponent = scc[j];
+                if (component !== neighborComponent) {
+                    condensationMatrix[component - 1][neighborComponent - 1] = 1;
+                }
+            }
+        }
+    }
+
+    return condensationMatrix;
+}

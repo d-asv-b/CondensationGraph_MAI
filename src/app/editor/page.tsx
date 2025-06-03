@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { findScc, generateRandomColors, generateRndAdjacencyMatrix } from "./functionality";
+import { findScc, generateRandomColors, generateRndAdjacencyMatrix, getCondensationAdjMatrix } from "./functionality";
 import GraphCanvas, { MouseState } from "./components/GraphCanvas";
 import { RiAddCircleLine } from "react-icons/ri";
 import { PiGraphLight } from "react-icons/pi";
@@ -13,6 +13,7 @@ export default function MainPage() {
     const { updateAdjacencyMatrix } = useAdjacencyMatrix();
     const [colors, setColors] = useState<string[]>([]);
     const [stronglyConnectedComponents, setStronglyConnectedComponents] = useState<number[]>([]);
+    const [ condensationAdjMatrix, setCondensationAdjMatrix ] = useState<number[][]>([]);
 
     const matrixRef = useRef<number[][]>([]);
 
@@ -24,6 +25,9 @@ export default function MainPage() {
         const scc = findScc(initial);
         setStronglyConnectedComponents(scc);
         setColors(generateRandomColors((new Set(scc)).size));
+
+        const initialCondensationAdjMatrix = getCondensationAdjMatrix(initial, scc);
+        setCondensationAdjMatrix(initialCondensationAdjMatrix);
     }, []);
 
     function updateSrcAdjacencyMatrix(newMatrix: number[][]) {
@@ -31,9 +35,15 @@ export default function MainPage() {
         if (!areMatricesEqual(matrixRef.current, newMatrix)) {
             matrixRef.current = newMatrix;
             updateAdjacencyMatrix(newMatrix);
+
             const newScc = findScc(newMatrix);
             setStronglyConnectedComponents(newScc);
-            setColors([...generateRandomColors((new Set(newScc)).size - colors.length), ...colors]);
+            
+            const uniqueComponents = new Set(newScc);
+            setColors(generateRandomColors(uniqueComponents.size))
+
+            const newCondensationAdjMatrix = getCondensationAdjMatrix(newMatrix, newScc);
+            setCondensationAdjMatrix(newCondensationAdjMatrix);
         }
     }
 
@@ -104,13 +114,26 @@ export default function MainPage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col grow shadow-lg rounded-lg p-4 h-full bg-white">
-                        <GraphCanvas
-                            mouseState={mouseState}
-                            colors={colors}
-                            stronglyConnectedComponents={stronglyConnectedComponents}
-                            updateAdjacencyMatrix={updateSrcAdjacencyMatrix}
-                        />
+                    <div className="flex flex-col lg:flex-row grow shadow-lg rounded-lg p-4 h-full bg-white">
+                        <div className="flex flex-col w-full h-full">
+                            <h2 className="text-xl font-bold mb-2 text-center">Исходный граф</h2>
+                            <GraphCanvas
+                                mouseState={mouseState}
+                                colors={colors}
+                                stronglyConnectedComponents={stronglyConnectedComponents}
+                                adjacencyMatrix={matrixRef.current}
+                                updateAdjacencyMatrix={updateSrcAdjacencyMatrix}
+                            />
+                        </div>
+                        <div className="flex flex-col w-full h-full mt-4 lg:mt-0 lg:ml-4">
+                            <h2 className="text-xl font-bold mb-2 text-center">Конденсация графа</h2>
+                            <GraphCanvas
+                                colors={colors}
+                                isCondensation={true}
+                                stronglyConnectedComponents={stronglyConnectedComponents}
+                                adjacencyMatrix={condensationAdjMatrix}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
